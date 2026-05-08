@@ -178,7 +178,7 @@ export default function Home() {
 	      <SignInButton />
 	    </div>
 	  ) : (
-	    <div className="flex items-center gap-3 rounded-2xl border border-blue-500/20 bg-blue-950/40 p-4">
+	    <div className="flex items-center gap-4 rounded-2xl border border-blue-500/20 bg-blue-950/40 p-4">
 	      <img
 	        src={profile.pfpUrl}
 	        alt="pfp"
@@ -191,7 +191,7 @@ export default function Home() {
 	        </p>
 
 	        <p className="text-sm text-gray-400">
-	          Connected with Farcaster
+        	  Connected with Farcaster
 	        </p>
 	      </div>
 	    </div>
