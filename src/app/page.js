@@ -38,7 +38,6 @@ export default function Home() {
       setLoading(true);
 
       const username =
-        profile?.username ||
         "guest_" + Math.floor(Math.random() * 999999);
 
       const wallet =
