@@ -1,0 +1,17 @@
+{
+  "accountAssociation": {
+    "header": "placeholder",
+    "payload": "placeholder",
+    "signature": "placeholder"
+  },
+  "frame": {
+    "version": "1",
+    "name": "PizzaBase",
+    "iconUrl": "https://pizzabase.vercel.app/icon.png",
+    "homeUrl": "https://pizzabase.vercel.app",
+    "imageUrl": "https://pizzabase.vercel.app/preview.png",
+    "buttonTitle": "Open PizzaBase",
+    "splashImageUrl": "https://pizzabase.vercel.app/icon.png",
+    "splashBackgroundColor": "#0A0F2C"
+  }
+}
