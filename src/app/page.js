@@ -12,6 +12,7 @@ export default function Home() {
   const [count, setCount] = useState(0);
   const [joined, setJoined] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [timeLeft, setTimeLeft] = useState({});
 
   async function fetchCount() {
     const { count } = await supabase
@@ -68,6 +69,41 @@ export default function Home() {
   useEffect(() => {
     fetchCount();
   }, []);
+
+  useEffect(() => {
+  const targetDate = new Date("2026-05-22T00:00:00");
+
+  const timer = setInterval(() => {
+    const now = new Date();
+    const difference = targetDate - now;
+
+    if (difference <= 0) {
+      clearInterval(timer);
+      setTimeLeft(null);
+      return;
+    }
+
+    const days = Math.floor(difference / (1000 * 60 * 60 * 24));
+    const hours = Math.floor(
+      (difference / (1000 * 60 * 60)) % 24
+    );
+    const minutes = Math.floor(
+      (difference / (1000 * 60)) % 60
+    );
+    const seconds = Math.floor(
+      (difference / 1000) % 60
+    );
+
+    setTimeLeft({
+      days,
+      hours,
+      minutes,
+      seconds,
+    });
+  }, 1000);
+
+  return () => clearInterval(timer);
+}, []);
 
   const [pizzas, setPizzas] = useState([]);
 
@@ -163,6 +199,50 @@ useEffect(() => {
             </p>
 
           </div>
+
+          <div className="mt-6 bg-blue-500/10 border border-blue-400/20 rounded-2xl p-4">
+  <p className="text-blue-300 text-sm mb-2">
+    🍕 Bitcoin Pizza Day Countdown
+  </p>
+
+  {timeLeft ? (
+    <div className="grid grid-cols-4 gap-2 text-center">
+      <div>
+        <p className="text-2xl font-bold text-white">
+          {timeLeft.days}
+        </p>
+        <p className="text-xs text-gray-400">Days</p>
+      </div>
+
+      <div>
+        <p className="text-2xl font-bold text-white">
+          {timeLeft.hours}
+        </p>
+        <p className="text-xs text-gray-400">Hours</p>
+      </div>
+
+      <div>
+        <p className="text-2xl font-bold text-white">
+          {timeLeft.minutes}
+        </p>
+        <p className="text-xs text-gray-400">Minutes</p>
+      </div>
+
+      <div>
+        <p className="text-2xl font-bold text-white">
+          {timeLeft.seconds}
+        </p>
+        <p className="text-xs text-gray-400">Seconds</p>
+      </div>
+    </div>
+  ) : (
+    <div className="text-center">
+      <p className="text-green-400 font-bold text-xl">
+        🍕 Pizza Day Started!
+      </p>
+    </div>
+  )}
+</div>
 
           {/* PROGRESS */}
           <div className="mb-8">
