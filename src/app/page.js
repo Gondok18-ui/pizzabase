@@ -158,7 +158,7 @@ export default function Home() {
 	        </p>
 
 	        <p className="text-sm text-gray-400">
-	          Open in Warpcast
+	          Open in Farcaster app
 	        </p>
 	      </div>
 	    </div>
