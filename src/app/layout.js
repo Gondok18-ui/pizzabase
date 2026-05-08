@@ -1,23 +1,44 @@
-"use client";
-
 import "./globals.css";
 
-import { AuthKitProvider } from "@farcaster/auth-kit";
+export const metadata = {
+  title: "PizzaBase",
+  description: "Bitcoin Pizza Day on Farcaster",
 
-const config = {
-  rpcUrl: "https://mainnet.optimism.io",
-  domain: "pizzabase.vercel.app",
-  siweUri: "https://pizzabase.vercel.app/login",
+  openGraph: {
+    title: "PizzaBase 🍕",
+    description:
+      "Claim your early slice on Base",
+    images: [
+      "https://pizzabase.vercel.app/og.png",
+    ],
+  },
+
+  other: {
+    "fc:miniapp": JSON.stringify({
+      version: "1",
+      imageUrl:
+        "https://pizzabase.vercel.app/og.png",
+      button: {
+        title: "🍕 Open PizzaBase",
+        action: {
+          type: "launch_frame",
+          name: "PizzaBase",
+          url: "https://pizzabase.vercel.app",
+          splashImageUrl:
+            "https://pizzabase.vercel.app/og.png",
+          splashBackgroundColor: "#0052ff",
+        },
+      },
+    }),
+  },
 };
 
-export default function RootLayout({ children }) {
+export default function RootLayout({
+  children,
+}) {
   return (
     <html lang="en">
-      <body>
-        <AuthKitProvider config={config}>
-          {children}
-        </AuthKitProvider>
-      </body>
+      <body>{children}</body>
     </html>
   );
 }
