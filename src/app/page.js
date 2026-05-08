@@ -137,10 +137,11 @@ export default function Home() {
       {pizzas.map((pizza) => (
         <div
           key={pizza.id}
-          className="absolute opacity-20 animate-bounce"
+          className="absolute opacity-20 animate-pulse"
           style={{
             left: `${pizza.left}%`,
             top: `-50px`,
+	    animation: `fall ${pizza.duration}s linear infinite`,
             fontSize: `${pizza.size}px`,
             animationDuration: `${pizza.duration}s`,
             animationDelay: `${pizza.delay}s`,
@@ -173,21 +174,23 @@ export default function Home() {
         {/* Farcaster Login */}
 	<div className="mt-6">
 	  {!profile ? (
-	    <SignInButton />
+	    <div className="flex justify-center">
+	      <SignInButton />
+	    </div>
 	  ) : (
-	    <div className="flex items-center gap-3 rounded-2xl border border-blue-500/20 bg-blue-950/40 p-3">
+	    <div className="flex items-center gap-3 rounded-2xl border border-blue-500/20 bg-blue-950/40 p-4">
 	      <img
 	        src={profile.pfpUrl}
 	        alt="pfp"
-	        className="h-12 w-12 rounded-full"
+	        className="h-14 w-14 rounded-full border border-blue-400"
 	      />
 
 	      <div>
-	        <p className="text-white font-bold">
-        	  @{profile.username}
+	        <p className="text-lg font-bold text-white">
+	          @{profile.username}
 	        </p>
 
-	        <p className="text-xs text-gray-400">
+	        <p className="text-sm text-gray-400">
 	          Connected with Farcaster
 	        </p>
 	      </div>

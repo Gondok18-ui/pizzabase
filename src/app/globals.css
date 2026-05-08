@@ -24,3 +24,13 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+@keyframes fall {
+  0% {
+    transform: translateY(-100px) rotate(0deg);
+  }
+
+  100% {
+    transform: translateY(120vh) rotate(360deg);
+  }
+}
