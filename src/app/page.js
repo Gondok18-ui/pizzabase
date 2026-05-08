@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { createClient } from "@supabase/supabase-js";
+import { SignInButton, useProfile } from "@farcaster/auth-kit";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -23,6 +24,7 @@ export default function Home() {
 
   // Points system
   const [points, setPoints] = useState(0);
+  const { profile } = useProfile();
 
   // Pizza rain
   const [pizzas, setPizzas] = useState([]);
@@ -167,6 +169,31 @@ export default function Home() {
             </p>
           </div>
         </div>
+
+        {/* Farcaster Login */}
+	<div className="mt-6">
+	  {!profile ? (
+	    <SignInButton />
+	  ) : (
+	    <div className="flex items-center gap-3 rounded-2xl border border-blue-500/20 bg-blue-950/40 p-3">
+	      <img
+	        src={profile.pfpUrl}
+	        alt="pfp"
+	        className="h-12 w-12 rounded-full"
+	      />
+
+	      <div>
+	        <p className="text-white font-bold">
+        	  @{profile.username}
+	        </p>
+
+	        <p className="text-xs text-gray-400">
+	          Connected with Farcaster
+	        </p>
+	      </div>
+	    </div>
+	  )}
+	</div>
 
         {/* Hero */}
         <div className="mt-10">
@@ -340,7 +367,7 @@ export default function Home() {
 
         {/* Footer */}
         <p className="mt-8 text-center text-gray-600">
-          Powered by 0xpiscok
+          Built on Base • Powered by Farcaster
         </p>
       </div>
     </main>
