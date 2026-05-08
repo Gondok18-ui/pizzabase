@@ -301,7 +301,7 @@ useEffect(() => {
               </span>
 
               <span className="font-black text-blue-300">
-                {count}/10000
+                {count || 0}/10000
               </span>
 
             </div>
@@ -311,7 +311,7 @@ useEffect(() => {
               <div
                 className="h-full bg-gradient-to-r from-blue-400 via-cyan-300 to-blue-500 transition-all duration-700"
                 style={{
-                  width: `${(count / 10000) * 100}%`,
+                  width: `${((count || 0) / 10000) * 100}%`,
                 }}
               />
 
