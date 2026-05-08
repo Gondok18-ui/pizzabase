@@ -1,4 +1,4 @@
-"use client";
+ "use client";
 
 import { useEffect, useState } from "react";
 import { createClient } from "@supabase/supabase-js";
@@ -9,7 +9,7 @@ const supabase = createClient(
 );
 
 export default function Home() {
-  const [count, setCount] = useState(0);
+  const [points, setPoints] = useState(0);
   const [joined, setJoined] = useState(false);
   const [loading, setLoading] = useState(false);
   const [timeLeft, setTimeLeft] = useState({});
@@ -28,6 +28,50 @@ export default function Home() {
   async function joinWaitlist() {
     try {
       setLoading(true);
+  async function dailyCheckIn() {
+  const savedWallet =
+    localStorage.getItem("wallet");
+
+  if (!savedWallet) {
+    alert("Join waitlist first");
+    return;
+  }
+
+  const { data: user } = await supabase
+    .from("waitlist")
+    .select("*")
+    .eq("wallet", savedWallet)
+    .single();
+
+  if (!user) return;
+
+  const now = new Date();
+  const lastCheck = user.last_checkin
+    ? new Date(user.last_checkin)
+    : null;
+
+  if (
+    lastCheck &&
+    now - lastCheck < 24 * 60 * 60 * 1000
+  ) {
+    alert("Already checked in today");
+    return;
+  }
+
+  const newPoints = (user.points || 0) + 5;
+
+  await supabase
+    .from("waitlist")
+    .update({
+      points: newPoints,
+      last_checkin: now.toISOString(),
+    })
+    .eq("wallet", savedWallet);
+
+  setPoints(newPoints);
+
+  alert("+5 Pizza Points 🍕");
+}
 
       const wallet =
         "0x" +
@@ -45,6 +89,7 @@ export default function Home() {
           {
             wallet,
             username,
+           points: 10,
           },
         ]);
 
@@ -54,7 +99,9 @@ export default function Home() {
         return;
       }
 
+      localStorage.setItem("wallet", wallet);
       setJoined(true);
+      setPoints(10);
       fetchCount();
 
       alert("🍕 Successfully joined PizzaBase");
@@ -284,6 +331,27 @@ useEffect(() => {
               <p className="font-black text-blue-300">
                 FCFS
               </p>
+
+              <div className="mt-6 bg-white/5 border border-white/10 rounded-2xl p-4">
+  <div className="flex justify-between items-center">
+    <div>
+      <p className="text-gray-400 text-sm">
+        Pizza Points
+      </p>
+
+      <h2 className="text-3xl font-bold text-white">
+        {points}
+      </h2>
+    </div>
+
+    <button
+      onClick={dailyCheckIn}
+      className="bg-blue-500 hover:bg-blue-400 transition px-4 py-2 rounded-xl text-white font-semibold"
+    >
+      Daily +5
+    </button>
+  </div>
+</div>
 
               <p className="text-xs text-blue-100/50 mt-1">
                 Early Access
