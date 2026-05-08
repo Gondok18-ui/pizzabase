@@ -1,4 +1,4 @@
- "use client";
+"use client";
 
 import { useEffect, useState } from "react";
 import { createClient } from "@supabase/supabase-js";
@@ -9,78 +9,94 @@ const supabase = createClient(
 );
 
 export default function Home() {
-  const [points, setPoints] = useState(0);
+  const [count, setCount] = useState(0);
   const [joined, setJoined] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [timeLeft, setTimeLeft] = useState({});
+
+  // Countdown
+  const [timeLeft, setTimeLeft] = useState({
+    days: 0,
+    hours: 0,
+    minutes: 0,
+    seconds: 0,
+  });
+
+  // Points system
+  const [points, setPoints] = useState(0);
+
+  // Pizza rain
+  const [pizzas, setPizzas] = useState([]);
+
+  useEffect(() => {
+    fetchCount();
+
+    const targetDate = new Date("2026-05-22T00:00:00");
+
+    const timer = setInterval(() => {
+      const now = new Date();
+      const difference = targetDate - now;
+
+      if (difference <= 0) {
+        clearInterval(timer);
+        return;
+      }
+
+      setTimeLeft({
+        days: Math.floor(difference / (1000 * 60 * 60 * 24)),
+        hours: Math.floor(
+          (difference / (1000 * 60 * 60)) % 24
+        ),
+        minutes: Math.floor(
+          (difference / (1000 * 60)) % 60
+        ),
+        seconds: Math.floor((difference / 1000) % 60),
+      });
+    }, 1000);
+
+    // Pizza rain generator
+    const pizzaArray = Array.from({ length: 25 }).map((_, i) => ({
+      id: i,
+      left: Math.random() * 100,
+      delay: Math.random() * 10,
+      duration: 8 + Math.random() * 8,
+      size: 24 + Math.random() * 24,
+    }));
+
+    setPizzas(pizzaArray);
+
+    return () => clearInterval(timer);
+  }, []);
 
   async function fetchCount() {
-    const { count } = await supabase
-      .from("waitlist")
-      .select("*", {
-        count: "exact",
-        head: true,
-      });
+    try {
+      const { count, error } = await supabase
+        .from("waitlist")
+        .select("*", {
+          count: "exact",
+          head: true,
+        });
 
-    setCount(count || 0);
+      if (error) {
+        console.log(error);
+        return;
+      }
+
+      setCount(count || 0);
+    } catch (err) {
+      console.log(err);
+    }
   }
 
   async function joinWaitlist() {
     try {
       setLoading(true);
-  async function dailyCheckIn() {
-  const savedWallet =
-    localStorage.getItem("wallet");
-
-  if (!savedWallet) {
-    alert("Join waitlist first");
-    return;
-  }
-
-  const { data: user } = await supabase
-    .from("waitlist")
-    .select("*")
-    .eq("wallet", savedWallet)
-    .single();
-
-  if (!user) return;
-
-  const now = new Date();
-  const lastCheck = user.last_checkin
-    ? new Date(user.last_checkin)
-    : null;
-
-  if (
-    lastCheck &&
-    now - lastCheck < 24 * 60 * 60 * 1000
-  ) {
-    alert("Already checked in today");
-    return;
-  }
-
-  const newPoints = (user.points || 0) + 5;
-
-  await supabase
-    .from("waitlist")
-    .update({
-      points: newPoints,
-      last_checkin: now.toISOString(),
-    })
-    .eq("wallet", savedWallet);
-
-  setPoints(newPoints);
-
-  alert("+5 Pizza Points 🍕");
-}
 
       const wallet =
         "0x" +
-        Math.random()
-          .toString(16)
-          .substring(2, 12);
+        Math.random().toString(16).substring(2, 10);
 
       const username =
-        "pizza_" +
+        "user_" +
         Math.floor(Math.random() * 999999);
 
       const { error } = await supabase
@@ -89,346 +105,244 @@ export default function Home() {
           {
             wallet,
             username,
-           points: 10,
           },
         ]);
 
       if (error) {
         alert(error.message);
-        setLoading(false);
         return;
       }
 
-      localStorage.setItem("wallet", wallet);
       setJoined(true);
-      setPoints(10);
-      fetchCount();
+      setCount((prev) => prev + 1);
 
-      alert("🍕 Successfully joined PizzaBase");
+      // Reward points
+      setPoints(150);
+
+      alert("Successfully joined waitlist");
     } catch (err) {
       console.log(err);
       alert("Something went wrong");
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
   }
 
-  useEffect(() => {
-    fetchCount();
-  }, []);
-
-  useEffect(() => {
-  const targetDate = new Date("2026-05-22T00:00:00");
-
-  const timer = setInterval(() => {
-    const now = new Date();
-    const difference = targetDate - now;
-
-    if (difference <= 0) {
-      clearInterval(timer);
-      setTimeLeft(null);
-      return;
-    }
-
-    const days = Math.floor(difference / (1000 * 60 * 60 * 24));
-    const hours = Math.floor(
-      (difference / (1000 * 60 * 60)) % 24
-    );
-    const minutes = Math.floor(
-      (difference / (1000 * 60)) % 60
-    );
-    const seconds = Math.floor(
-      (difference / 1000) % 60
-    );
-
-    setTimeLeft({
-      days,
-      hours,
-      minutes,
-      seconds,
-    });
-  }, 1000);
-
-  return () => clearInterval(timer);
-}, []);
-
-  const [pizzas, setPizzas] = useState([]);
-
-useEffect(() => {
-  const generated = Array.from({ length: 25 }).map(() => ({
-    left: Math.random() * 100,
-    delay: Math.random() * 5,
-    duration: 5 + Math.random() * 10,
-    size: 30 + Math.random() * 50,
-    rotate: Math.random() * 360,
-  }));
-
-  setPizzas(generated);
-}, []);
-
   return (
-    <main className="min-h-screen overflow-hidden bg-gradient-to-b from-[#0047FF] via-[#001B7A] to-black relative flex items-center justify-center px-6 py-12 text-white">
+    <main className="relative min-h-screen overflow-hidden bg-gradient-to-b from-blue-700 via-blue-900 to-black flex items-center justify-center px-4 py-10">
 
-      {/* PIZZA RAIN */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+      {/* Pizza Rain */}
+      {pizzas.map((pizza) => (
+        <div
+          key={pizza.id}
+          className="absolute opacity-20 animate-bounce"
+          style={{
+            left: `${pizza.left}%`,
+            top: `-50px`,
+            fontSize: `${pizza.size}px`,
+            animationDuration: `${pizza.duration}s`,
+            animationDelay: `${pizza.delay}s`,
+          }}
+        >
+          🍕
+        </div>
+      ))}
 
-        {pizzas.map((_, i) => (
-          <div
-            key={i}
-            className="absolute text-5xl opacity-20 animate-bounce"
-            style={{
-              left: `${Math.random() * 100}%`,
-              top: `-${Math.random() * 100}%`,
-              animationDuration: `${5 + Math.random() * 10}s`,
-              animationIterationCount: "infinite",
-              animationTimingFunction: "linear",
-              transform: `rotate(${Math.random() * 360}deg)`,
-            }}
-          >
+      {/* Main Card */}
+      <div className="relative z-10 w-full max-w-md rounded-[40px] border border-blue-500/30 bg-[#020b2f]/95 p-7 shadow-[0_0_80px_rgba(59,130,246,0.45)]">
+
+        {/* Logo */}
+        <div className="flex items-center gap-4">
+          <div className="text-7xl drop-shadow-[0_0_20px_rgba(255,170,0,0.8)]">
             🍕
           </div>
-        ))}
 
-        {/* Falling animation */}
-        <style jsx>{`
-          @keyframes fall {
-            0% {
-              transform: translateY(-120vh) rotate(0deg);
-            }
+          <div>
+            <h1 className="text-5xl font-black tracking-tight text-blue-300">
+              PizzaBase
+            </h1>
 
-            100% {
-              transform: translateY(120vh) rotate(360deg);
-            }
-          }
+            <p className="text-gray-400 text-sm mt-1">
+              Bitcoin Pizza Day 2026
+            </p>
+          </div>
+        </div>
 
-          .animate-bounce {
-            animation-name: fall;
-          }
-        `}</style>
-      </div>
+        {/* Hero */}
+        <div className="mt-10">
+          <h2 className="text-5xl font-black leading-tight text-white">
+            Claim your{" "}
+            <span className="text-blue-400">
+              early slice.
+            </span>
+          </h2>
 
-      {/* BLUE GLOW */}
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(59,130,246,0.25),transparent_70%)]" />
+          <p className="mt-6 text-gray-400 text-xl leading-relaxed">
+            Join the first 10,000 pioneers celebrating
+            Bitcoin Pizza Day on Farcaster.
+          </p>
+        </div>
 
-      {/* MAIN CARD */}
-      <div className="relative z-10 max-w-md w-full">
+        {/* Countdown */}
+        <div className="mt-8 rounded-3xl border border-blue-500/20 bg-blue-950/40 p-5">
+          <p className="text-blue-300 text-sm mb-4">
+            🍕 Bitcoin Pizza Day Countdown
+          </p>
 
-        <div className="bg-[#050816]/90 border border-blue-400/30 rounded-[36px] p-8 shadow-[0_0_80px_rgba(59,130,246,0.35)] backdrop-blur-xl">
-
-          {/* HEADER */}
-          <div className="flex items-center gap-4 mb-8">
-
-            <div className="text-6xl drop-shadow-[0_0_25px_rgba(59,130,246,0.9)]">
-              🍕
+          <div className="grid grid-cols-4 gap-3 text-center">
+            <div>
+              <div className="text-4xl font-black text-white">
+                {timeLeft.days}
+              </div>
+              <div className="text-gray-400 text-sm">
+                Days
+              </div>
             </div>
 
             <div>
-              <h1 className="text-5xl font-black tracking-tight leading-none bg-gradient-to-r from-blue-300 to-cyan-200 bg-clip-text text-transparent">
-                PizzaBase
-              </h1>
-
-              <p className="text-blue-200/70 mt-2 text-sm">
-                Bitcoin Pizza Day 2026
-              </p>
-            </div>
-          </div>
-
-          {/* HERO */}
-          <div className="mb-8">
-
-            <h2 className="text-3xl font-black leading-tight mb-4">
-              Claim your
-              <span className="text-blue-300"> early slice.</span>
-            </h2>
-
-            <p className="text-blue-100/70 leading-relaxed">
-              Join the first 10,000 pioneers celebrating Bitcoin Pizza Day on Farcaster.
-            </p>
-
-          </div>
-
-          <div className="mt-6 bg-blue-500/10 border border-blue-400/20 rounded-2xl p-4">
-  <p className="text-blue-300 text-sm mb-2">
-    🍕 Bitcoin Pizza Day Countdown
-  </p>
-
-  {timeLeft ? (
-    <div className="grid grid-cols-4 gap-2 text-center">
-      <div>
-        <p className="text-2xl font-bold text-white">
-          {timeLeft.days}
-        </p>
-        <p className="text-xs text-gray-400">Days</p>
-      </div>
-
-      <div>
-        <p className="text-2xl font-bold text-white">
-          {timeLeft.hours}
-        </p>
-        <p className="text-xs text-gray-400">Hours</p>
-      </div>
-
-      <div>
-        <p className="text-2xl font-bold text-white">
-          {timeLeft.minutes}
-        </p>
-        <p className="text-xs text-gray-400">Minutes</p>
-      </div>
-
-      <div>
-        <p className="text-2xl font-bold text-white">
-          {timeLeft.seconds}
-        </p>
-        <p className="text-xs text-gray-400">Seconds</p>
-      </div>
-    </div>
-  ) : (
-    <div className="text-center">
-      <p className="text-green-400 font-bold text-xl">
-        🍕 Pizza Day Started!
-      </p>
-    </div>
-  )}
-</div>
-
-          {/* PROGRESS */}
-          <div className="mb-8">
-
-            <div className="flex justify-between mb-3 text-sm">
-
-              <span className="text-blue-100/70">
-                Slices Claimed
-              </span>
-
-              <span className="font-black text-blue-300">
-                {count || 0}/10000
-              </span>
-
-            </div>
-
-            <div className="w-full h-4 bg-[#081020] rounded-full overflow-hidden border border-blue-500/20">
-
-              <div
-                className="h-full bg-gradient-to-r from-blue-400 via-cyan-300 to-blue-500 transition-all duration-700"
-                style={{
-                  width: `${((count || 0) / 10000) * 100}%`,
-                }}
-              />
-
-            </div>
-
-          </div>
-
-          {/* FEATURES */}
-          <div className="grid grid-cols-3 gap-3 mb-8 text-center">
-
-            <div className="bg-[#081020] border border-blue-500/20 rounded-2xl p-4">
-
-              <div className="text-2xl mb-2">
-                ⚡
+              <div className="text-4xl font-black text-white">
+                {timeLeft.hours}
               </div>
-
-              <p className="font-black text-blue-300">
-                FCFS
-              </p>
-
-              <div className="mt-6 bg-white/5 border border-white/10 rounded-2xl p-4">
-  <div className="flex justify-between items-center">
-    <div>
-      <p className="text-gray-400 text-sm">
-        Pizza Points
-      </p>
-
-      <h2 className="text-3xl font-bold text-white">
-        {points}
-      </h2>
-    </div>
-
-    <button
-      onClick={dailyCheckIn}
-      className="bg-blue-500 hover:bg-blue-400 transition px-4 py-2 rounded-xl text-white font-semibold"
-    >
-      Daily +5
-    </button>
-  </div>
-</div>
-
-              <p className="text-xs text-blue-100/50 mt-1">
-                Early Access
-              </p>
-
-            </div>
-
-            <div className="bg-[#081020] border border-blue-500/20 rounded-2xl p-4">
-
-              <div className="text-2xl mb-2">
-                🍕
+              <div className="text-gray-400 text-sm">
+                Hours
               </div>
-
-              <p className="font-black text-blue-300">
-                10K
-              </p>
-
-              <p className="text-xs text-blue-100/50 mt-1">
-                Pizza Spots
-              </p>
-
             </div>
 
-            <div className="bg-[#081020] border border-blue-500/20 rounded-2xl p-4">
-
-              <div className="text-2xl mb-2">
-                🟦
+            <div>
+              <div className="text-4xl font-black text-white">
+                {timeLeft.minutes}
               </div>
-
-              <p className="font-black text-blue-300">
-                BASE
-              </p>
-
-              <p className="text-xs text-blue-100/50 mt-1">
-                Ecosystem
-              </p>
-
+              <div className="text-gray-400 text-sm">
+                Minutes
+              </div>
             </div>
 
-          </div>
-
-          {/* BUTTON */}
-          {joined ? (
-
-            <div className="bg-cyan-400/10 border border-cyan-300 rounded-2xl p-4 text-center font-bold text-cyan-300 shadow-[0_0_30px_rgba(34,211,238,0.25)]">
-              🍕 You successfully joined.
+            <div>
+              <div className="text-4xl font-black text-white">
+                {timeLeft.seconds}
+              </div>
+              <div className="text-gray-400 text-sm">
+                Seconds
+              </div>
             </div>
-
-          ) : (
-
-            <button
-              onClick={joinWaitlist}
-              disabled={loading}
-              className="w-full py-5 rounded-2xl font-black text-xl bg-gradient-to-r from-[#3B82F6] via-[#2563EB] to-[#60A5FA] text-white shadow-[0_0_40px_rgba(59,130,246,0.45)] hover:scale-[1.02] active:scale-[0.98] transition-all duration-200"
-            >
-
-              {loading
-                ? "Claiming Slice..."
-                : "🍕 Claim Your Slice"}
-
-            </button>
-
-          )}
-
-          {/* FOOTER */}
-          <div className="mt-8 text-center">
-
-            <p className="text-xs text-blue-100/40">
-              Powered by Farcaster Mini Apps
-            </p>
-
           </div>
-
         </div>
 
-      </div>
+        {/* Progress */}
+        <div className="mt-8">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-gray-400">
+              Slices Claimed
+            </span>
 
+            <span className="text-blue-300 font-bold">
+              {count}/10000
+            </span>
+          </div>
+
+          <div className="h-4 w-full overflow-hidden rounded-full bg-blue-950 border border-blue-500/20">
+            <div
+              className="h-full rounded-full bg-gradient-to-r from-blue-500 to-blue-300 transition-all duration-500"
+              style={{
+                width: `${(count / 10000) * 100}%`,
+              }}
+            />
+          </div>
+        </div>
+
+        {/* Features */}
+        <div className="mt-8 grid grid-cols-3 gap-4">
+
+          <div className="rounded-3xl border border-blue-500/20 bg-black/20 p-5 text-center">
+            <div className="text-4xl">⚡</div>
+
+            <div className="mt-4 text-3xl font-black text-blue-300">
+              FCFS
+            </div>
+
+            <div className="mt-2 text-gray-500">
+              Early Access
+            </div>
+          </div>
+
+          <div className="rounded-3xl border border-blue-500/20 bg-black/20 p-5 text-center">
+            <div className="text-4xl">🍕</div>
+
+            <div className="mt-4 text-3xl font-black text-blue-300">
+              10K
+            </div>
+
+            <div className="mt-2 text-gray-500">
+              Pizza Spots
+            </div>
+          </div>
+
+          <div className="rounded-3xl border border-blue-500/20 bg-black/20 p-5 text-center">
+            <div className="text-4xl">🟦</div>
+
+            <div className="mt-4 text-3xl font-black text-blue-300">
+              BASE
+            </div>
+
+            <div className="mt-2 text-gray-500">
+              Ecosystem
+            </div>
+          </div>
+        </div>
+
+        {/* Points Section */}
+        <div className="mt-8 rounded-3xl border border-yellow-500/20 bg-yellow-500/10 p-5">
+          <div className="flex items-center justify-between">
+            <h3 className="text-2xl font-black text-yellow-300">
+              🍕 Pizza Points
+            </h3>
+
+            <span className="text-3xl font-black text-white">
+              {points}
+            </span>
+          </div>
+
+          <div className="mt-4 space-y-3 text-sm text-gray-300">
+            <div className="flex justify-between">
+              <span>Join Waitlist</span>
+              <span>+150</span>
+            </div>
+
+            <div className="flex justify-between">
+              <span>Follow Account</span>
+              <span>+100</span>
+            </div>
+
+            <div className="flex justify-between">
+              <span>Recast Campaign</span>
+              <span>+200</span>
+            </div>
+
+            <div className="flex justify-between">
+              <span>Share Cast</span>
+              <span>+300</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Button */}
+        <button
+          onClick={joinWaitlist}
+          disabled={loading || joined}
+          className="mt-8 w-full rounded-3xl bg-gradient-to-r from-blue-500 to-blue-300 py-6 text-3xl font-black text-white shadow-[0_0_40px_rgba(59,130,246,0.7)] transition-all hover:scale-[1.02] active:scale-[0.98]"
+        >
+          {loading
+            ? "Joining..."
+            : joined
+            ? "🍕 Joined"
+            : "🍕 Claim Your Slice"}
+        </button>
+
+        {/* Footer */}
+        <p className="mt-8 text-center text-gray-600">
+          Powered by 0xpiscok
+        </p>
+      </div>
     </main>
   );
 }
