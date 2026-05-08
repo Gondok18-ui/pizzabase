@@ -3,18 +3,12 @@
 import { useEffect, useState } from "react";
 import { createClient } from "@supabase/supabase-js";
 
-import {
-  SignInButton,
-  useProfile,
-} from "@farcaster/auth-kit";
-
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 );
 
 export default function Home() {
-  const { profile } = useProfile();
 
   const [count, setCount] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -142,32 +136,34 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Login */}
-        <div className="mt-6">
-          {!profile ? (
-            <div className="flex justify-center">
-              <SignInButton />
-            </div>
-          ) : (
-            <div className="flex items-center gap-4 rounded-2xl border border-blue-500/20 bg-blue-950/40 p-4">
-              <img
-                src={profile.pfpUrl}
-                alt="pfp"
-                className="h-14 w-14 rounded-full border border-blue-400"
-              />
+        {/* Farcaster Login */}
+	<div className="mt-6">
+	  <button
+	    onClick={() =>
+	      window.open(
+	        "https://warpcast.com/~/apps",
+	        "_blank"
+	      )
+	    }
+	    className="w-full rounded-2xl border border-blue-500/20 bg-blue-950/40 p-4 text-left transition hover:border-blue-400"
+	  >
+	    <div className="flex items-center gap-4">
+	      <div className="flex h-14 w-14 items-center justify-center rounded-full border border-blue-400 text-2xl">
+	        🟣
+	      </div>
 
-              <div>
-                <p className="text-lg font-bold text-white">
-                  @{profile.username}
-                </p>
+	      <div>
+	        <p className="text-lg font-bold text-white">
+	          Connect Farcaster
+	        </p>
 
-                <p className="text-sm text-gray-400">
-                  Connected with Farcaster
-                </p>
-              </div>
-            </div>
-          )}
-        </div>
+	        <p className="text-sm text-gray-400">
+	          Open in Warpcast
+	        </p>
+	      </div>
+	    </div>
+	  </button>
+	</div>
 
         {/* Heading */}
         <h2 className="mt-10 text-6xl font-black leading-none text-white">
