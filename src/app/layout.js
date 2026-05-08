@@ -1,6 +1,7 @@
 "use client";
 
 import "./globals.css";
+
 import { AuthKitProvider } from "@farcaster/auth-kit";
 
 const config = {
